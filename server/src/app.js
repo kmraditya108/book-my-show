@@ -64,7 +64,7 @@ app.post('/login', async (req, res)=>{
     if(!user){
         throw new AuthenticationError("Invalid email or password");
     }
-    console.log("login user: :: ", user);
+    // console.log("login user: :: ", user);
     
     // Verify the incoming password
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
@@ -90,7 +90,7 @@ app.get('/users', isLoggedIn, async(req, res)=>{
 app.get('/profile', isLoggedIn, async (req, res)=>{
     const{userId} = req;
     const user = await User.findById(userId).select('-password');
-    console.log("Profile user : ", user);
+    // console.log("Profile user : ", user);
     
     // res.send('Sending you the profile!!');
     res.json(ApiResponse.build(true, 'user profile', user));
