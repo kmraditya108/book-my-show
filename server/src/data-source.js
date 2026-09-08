@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import mongoos from 'mongoose';
 
 class AppDataSource{
     static async connect(){

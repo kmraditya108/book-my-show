@@ -3,7 +3,7 @@ export class ApiResponse{
         return {
             status,
             message,
-            data
+            payload:data
         };
     }
 }
