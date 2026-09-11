@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Link as RouterLink } from 'react-router'
 import { Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
 import axios from 'axios';
 import MoviesCardLayout from '../components/MoviesCardLayout.jsx'
+import UserContext from '../context/user-context.jsx';
 
 const HomePage = () => {
     const [movies, setMovies] = useState();
+    const {token}  = useContext(UserContext);
+    console.log("home page token >> ", token);
+    
 
     useEffect(() => {
         (async () => {

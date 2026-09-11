@@ -1,10 +1,12 @@
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import StarIcon from '@mui/icons-material/Star';
 import { Box, Button, Card, CardContent, CardMedia, IconButton, Stack, Typography } from '@mui/material';
+import { Link as RouterLink } from 'react-router';
 
 export default function MoviesCardLayout({ movie }) {
+
     return (
-        <Card sx={{
+        <Card component={RouterLink} to={`/movie/${movie._id}`} sx={{
             overflow: 'hidden',
             borderRadius: 2,
             backgroundColor: 'background.paper',
@@ -53,8 +55,10 @@ export default function MoviesCardLayout({ movie }) {
                     fullWidth
                     variant="contained"
                     sx={{ mt: 1.5, py: 0.8, borderRadius: 1, fontWeight: 700 }}
+                    component={RouterLink}
+                    to={`/movies/${movie._id}`}
                 >
-                    Book tickets
+                    Book tickets: {movie._id}
                 </Button>
             </CardContent>
         </Card>

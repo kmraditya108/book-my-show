@@ -27,14 +27,17 @@ const SignUpPage = () => {
         const { email, password, type: role } = formData;
         console.log("email,password,type >>> ", email, password, role);
 
-        axios.post('http://localhost:8080/registration', {
+        axios.post('http://localhost:8080/users/registration', {
             email: email,
             password: password,
             role: role
         }).then(res => {
             // console.log("Registartion response : ", res);
             showAlert(res?.data?.message, 'success');
-            navigate('/login');
+            // navigate('/login');
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
         }).catch(e => {
             console.log('1--Catched errror >> ', e?.response);
             // Fallback to e.message if the server didn't return a custom message

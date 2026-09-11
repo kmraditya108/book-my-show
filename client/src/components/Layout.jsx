@@ -1,13 +1,22 @@
 import { useContext } from 'react';
-import { Link as RouterLink } from 'react-router'
+import { Link as RouterLink, useNavigate, useNavigation } from 'react-router'
 import ConfirmationNumberOutlinedIcon from '@mui/icons-material/ConfirmationNumberOutlined';
 import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material';
 import UserContext from '../context/user-context';
+import { getCookies } from '../utils/cookies';
 
 
 
 const Layout = ({ children }) => {
-    const{isLoggedIn, email, resetUserContext} = useContext(UserContext)
+    const{isLoggedIn, email, role, resetUserContext, getUserLists} = useContext(UserContext);
+    const navigate = useNavigate();
+
+    const loginHandler = () => {
+        getCookies('token');
+        setTimeout(()=>{
+            navigate("/login");
+        }, 1000);
+    }
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <AppBar position='static' elevation={0} sx={{ backgroundColor: '#fff', color: '#1f1f1f', borderBottom: '1px solid #eee' }}>
@@ -17,8 +26,9 @@ const Layout = ({ children }) => {
                         book<span style={{ color: '#1f1f1f' }}>my</span>show
                     </Typography>
 
-                    {!isLoggedIn && <Button color="inherit" component={RouterLink} to="/login">Login</Button>}
+                    {!isLoggedIn && <Button color="inherit" onClick={()=>loginHandler()}>Login</Button>}
                     {!isLoggedIn && <Button variant="contained" component={RouterLink} to="/signup" sx={{ ml: 1 }}>Sign up</Button>}
+                    {isLoggedIn && role==='ADMIN' && <Button color="inherit" onClick={getUserLists}>Users list</Button>}
                     {isLoggedIn && <Button color="inherit" component={RouterLink} to="/">{email}</Button>}
                     {isLoggedIn && <Button color="inherit" component={RouterLink} to="/" onClick={() => resetUserContext()}>Logout</Button>}
                 </Toolbar>
