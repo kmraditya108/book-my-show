@@ -1,12 +1,14 @@
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import StarIcon from '@mui/icons-material/Star';
-import { Box, Button, Card, CardContent, CardMedia, IconButton, Stack, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, CardMedia, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { Link as RouterLink } from 'react-router';
 
-export default function MoviesCardLayout({ movie }) {
+export default function MoviesCardLayout({ movie, children=null }) {
 
     return (
-        <Card component={RouterLink} to={`/movie/${movie._id}`} sx={{
+        <Grid key={movie._id} size={{ xs: 6, sm: 4, md: 3 }}>
+        {/* <Card component={RouterLink} to={`/movie/${movie._id}`} sx={{ */}
+        <Card sx={{
             overflow: 'hidden',
             borderRadius: 2,
             backgroundColor: 'background.paper',
@@ -51,7 +53,8 @@ export default function MoviesCardLayout({ movie }) {
                 <Typography variant="body2" color="text.secondary" noWrap sx={{ mt: 0.75 }}>
                     {movie?.genres?.join(' · ')}
                 </Typography>
-                <Button
+                {children}
+                {/* <Button
                     fullWidth
                     variant="contained"
                     sx={{ mt: 1.5, py: 0.8, borderRadius: 1, fontWeight: 700 }}
@@ -59,8 +62,9 @@ export default function MoviesCardLayout({ movie }) {
                     to={`/movies/${movie._id}`}
                 >
                     Book tickets: {movie._id}
-                </Button>
+                </Button> */}
             </CardContent>
         </Card>
+        </Grid>
     );
 }

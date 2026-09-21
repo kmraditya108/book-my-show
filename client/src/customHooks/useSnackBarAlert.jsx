@@ -10,7 +10,6 @@ export const useSnackBarAlert = () => {
     const [open, setOpen] = useState(false);
 
     const showAlert = useCallback((message, type) => {
-        console.log("showAlert -- message, type >> ", message, type);
 
         if (!VALID_ALERT_TYPES.includes(type)) {
             throw new Error(`Type mismatched. It should be one of: ${VALID_ALERT_TYPES.join(', ')}`);
@@ -21,8 +20,6 @@ export const useSnackBarAlert = () => {
     }, [])
 
     const hideAlert = useCallback((event, reason) => {
-        console.log("hideAlert -- event, reason >> ", event, reason);
-
         if (reason === 'clickaway') return;
 
         setOpen(false);

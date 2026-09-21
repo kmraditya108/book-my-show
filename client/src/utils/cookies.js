@@ -4,7 +4,7 @@ export const getCookies = (name) => {
         cookie = cookie.trim();
         if(cookie.startsWith(name+'=')){
             const cookieData= cookie.substring(name.length+1);
-            console.log("cookies Data >> ", cookieData);
+            // // console.log("cookies Data >> ", cookieData);
             return cookieData;
             
         }
@@ -18,5 +18,19 @@ export const setCookies = (data) => {
         document.cookie += `${data};`
     }else{
         document.cookie = `${data};`;
+    }
+}
+
+export const resetCookies = () => {
+    const cookies = document.cookie.split(';');
+
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf("=");
+        // Extract the name of the cookie (and trim whitespace)
+        const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+        
+        // Expire the cookie across the common path configurations
+        document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     }
 }

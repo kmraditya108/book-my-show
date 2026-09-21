@@ -7,9 +7,9 @@ import UserContext from '../context/user-context.jsx';
 
 const HomePage = () => {
     const [movies, setMovies] = useState();
-    const {token}  = useContext(UserContext);
-    console.log("home page token >> ", token);
-    
+    const { token } = useContext(UserContext);
+    // console.log("home page token >> ", token);
+
 
     useEffect(() => {
         (async () => {
@@ -44,11 +44,17 @@ const HomePage = () => {
             <Typography variant="h4" component="h2" fontWeight={800}>Recommended movies</Typography>
             <Typography color="text.secondary" sx={{ mt: 0.5, mb: 3 }}>Handpicked for your next big-screen experience</Typography>
             <Grid container spacing={{ xs: 2, md: 3 }}>
-                {movies?.map((movie) => (
-                    <Grid key={movie._id} size={{ xs: 6, sm: 4, md: 3 }}>
-                        <MoviesCardLayout movie={movie} />
-                    </Grid>
-                ))}
+                {movies?.map((movie) => <MoviesCardLayout key={movie._id} movie={movie}>
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 1.5, py: 0.8, borderRadius: 1, fontWeight: 700 }}
+                        component={RouterLink}
+                        to={`/movies/${movie._id}`}
+                    >
+                        Book tickets: {movie._id}
+                    </Button>
+                </MoviesCardLayout>)}
             </Grid>
         </Container>
     </Box>

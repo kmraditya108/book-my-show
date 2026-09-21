@@ -1,44 +1,92 @@
-import { Box, Button, Chip, Container, Stack, Typography } from "@mui/material";
+import { Box, Button, Card, CardActionArea, CardContent, CardMedia, Chip, Container, Stack, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { Link as RouterLink } from "react-router";
 import { useParams } from "react-router";
-import axios from "axios";
 import Loader from "../components/Loader.jsx";
+import useHttp from "../customHooks/useHttp.jsx";
+import { fetchMovie } from "../lib/apis.js";
+import BackButton from "../components/BackButton.jsx";
+import TheatreLayout from "../components/TheatreLayout.jsx";
+import ErrorScreen from "../components/ErrorScreen.jsx";
 
+const CastCard = ({ image, name, alias }) => {
+    return <Card sx={{
+        maxWidth: 150,
+        mr: 1,
+        // display:'flex'
+    }}>
+        <CardActionArea >
+            <CardMedia
+                sx={{
+                    borderRadius: 100,
+                    height: 100,
+                    width: 100,
+                    justifySelf: 'center',
+                    padding: 1
+                }}
+                component="img"
+                // height="180"
+                // width="50"
+                image={image}
+                alt="green iguana"
+            />
+            <CardContent sx={{ textAlign: 'center', borderTop: 1, borderColor: 'rgba(0, 0, 0, 0.14)' }}>
+                <Typography gutterBottom variant="h7" component="div">
+                    {name}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {alias}
+                </Typography>
+            </CardContent>
+        </CardActionArea>
+    </Card>
+}
 
 const MovieDetailsPage = () => {
     const { movieId } = useParams();
+    const { data: movieData, error: movieError, status: movieStatus, sendRequest: moviesRequestSend } = useHttp(fetchMovie);
 
     const [loadedMovie, setLoadedMovie] = useState(null);
+    const [screeningsDetails, setScreeningsDetails] = useState(null);
+    // const [screeningTheatre, setScreeningTheatre] = useState(null);
     const [isloading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        let isActive = true;
-        const loadMovie = async () => {
-            try {
-                setIsLoading(true);
-                setError('');
-                const response = await axios(`http://localhost:8080/movies/${movieId}`);
-                if (isActive) {
-                    setLoadedMovie(response.data.payload);
-                }
-            } catch (error) {
-                if (isActive) {
-                    setError(error?.response?.data?.message ?? "We could n't load this movie, Please try after sometimes later.");
-                }
-            } finally {
-                if (isActive) {
-                    setIsLoading(false);
-                }
-            }
-        }
-        loadMovie();
+        setIsLoading(true);
+        setError('');
+        moviesRequestSend(movieId);
+    }, [])
 
-        return () => { isActive = false; }
-    }, [movieId]);
+    useEffect(() => {
+        // console.log("movieStatus >>> ", movieStatus);
+        // console.log("1- movieData >>> ", movieData);
+        // console.log("2- movieData >>> ", movieData?.payload);
+        if (movieStatus === 'completed') {
+            if (movieData?.payload?.movie) {
+                setLoadedMovie(movieData?.payload?.movie);
+            }
+            if (movieData?.payload?.screening) {
+                setScreeningsDetails(movieData?.payload?.screening)
+            }
+
+            if (movieData?.payload?.theatre) {
+                console.log("movieData?.payload?.theatre >> ", movieData?.payload?.theatre);
+
+                setScreeningTheatre(movieData?.payload?.theatre)
+            }
+
+            setIsLoading(false);
+        }
+
+        if (movieStatus === 'completed' && !movieData?.payload?.movie) {
+            setError(error?.response?.data?.message ?? "We could n't load this movie, Please try after sometimes later.");
+            setIsLoading(false);
+        }
+
+    }, [movieData, movieStatus])
 
     if (isloading) {
         return <Loader message={'Loading movie details...'} />
@@ -50,14 +98,10 @@ const MovieDetailsPage = () => {
 
     const rating = loadedMovie.rating.toFixed?.(1) ?? loadedMovie.rating ?? 'N/A';
 
-
-
     return <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%' }}>
         <Box sx={{ bgcolor: '#1f2533', color: 'common.white', py: { xs: 3, md: 4 } }}>
             <Container maxWidth="lg">
-                <Button component={RouterLink} nativeButton={false} to="/" startIcon={<ArrowBackRoundedIcon />} sx={{ color: 'common.white', mb: { xs: 1.5, md: 1.5 } }}>
-                    Back to movies
-                </Button>
+                <BackButton to={'/'} title={'movies'} />
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 3, md: 4 }} alignItems={{ xs: 'center', sm: 'flex-start' }}>
                     <Box component="img" src={loadedMovie.posterUrl} alt={`${loadedMovie.title} poster`} sx={{ display: 'block', width: { xs: 190, sm: 240 }, height: { xs: 285, sm: 360 }, objectFit: 'cover', borderRadius: 2, boxShadow: '0 16px 32px rgba(0,0,0,0.35)' }} />
                     <Stack spacing={2} sx={{ flexGrow: 1, textAlign: { xs: 'center', sm: 'left' } }}>
@@ -77,14 +121,44 @@ const MovieDetailsPage = () => {
                 </Stack>
             </Container>
         </Box>
-        <Container  maxWidth="lg" sx={{gap:2}}>
-                <Stack direction="row" flexWrap="wrap" gap={1} justifyContent={{ xs: 'center', sm: 'flex-start' }}>
-                            {(loadedMovie.cast ?? []).map((cst) => {
-                                return <><Box component="img" src={cst.profilePicture} alt={`${cst.title} poster`} sx={{ mr:5, display: 'flex', flexDirection:'column', width: { xs: 100, sm: 100 }, height: { xs: 100, sm: 100 }, objectFit: 'cover', borderRadius: 50, boxShadow: '0 16px 32px rgba(0,0,0,0.35)' }} />
-                                <Typography sx={{ color: 'rgba(111, 111, 111, 0.75)' }}>{cst.name}</Typography>
-                                </>})}
-                        </Stack>
-            </Container>
+        <Container maxWidth="lg" sx={{ gap: 2 }}>
+            <Typography component={'h3'} variant="h5" sx={{ pb: 2, fontWeight: 900 }}># About the Movie</Typography>
+            {/* <Typography component={'body'}>{loadedMovie?.title} is a {loadedMovie?.genres?.join(', ') || 'feature'} film. Explore the cast and reserve your seats for the big screen.</Typography> */}
+            <Typography component={'p'}>{loadedMovie?.title} is a {loadedMovie?.genres?.join(', ') || 'feature'} film. Explore the cast and reserve your seats for the big screen.</Typography>
+
+            <Stack direction="row" flexWrap="wrap" gap={1} justifyContent={{ xs: 'center', sm: 'flex-start' }} sx={{ mt: 5 }}>
+
+                {(loadedMovie.cast ?? []).map((cst) => {
+                    return <CastCard key={cst._id} image={cst.profilePicture} name={cst.name} alias={cst.alias} />
+                })}
+            </Stack>
+        </Container>
+
+        {screeningsDetails && <Container sx={{ mt: 5, mb: 10 }}>
+            <Typography component={'h3'} variant="h5" sx={{ pb: 2, fontWeight: 900 }}>{'# Screening'} </Typography>
+            <Box sx={{ gap: 2, flexDirection: 'row', display: 'flex' }}>{screeningsDetails?.map(screen => screen?.theatre && <TheatreLayout theatre={screen?.theatre}>
+                <Box sx={{ pt: 2, borderTop:1, mt:2, px:5 }}>
+                    {screen?.showTimings && screen?.showTimings?.map(time => <Button
+                        sx={{
+                            backgroundColor: 'red',
+                            color: 'white',
+                            p: 0,
+                            borderWidth: 2,
+                            borderRadius: 5,
+                            borderColor: 'black',
+
+                            position: 'absolute',
+                            right: 15,
+                            bottom: 10
+                        }}>{time}</Button>)}
+                    <Typography sx={{
+                        position: 'absolute',
+                        left: 15,
+                        bottom: 10
+                    }} component={'p'}>Price: ₹{screen?.price}</Typography>
+                </Box>
+            </TheatreLayout>)}</Box>
+        </Container>}
     </Box>
 }
 

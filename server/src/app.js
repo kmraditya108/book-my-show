@@ -9,6 +9,7 @@ import { ApiResponse } from './core/ApiResponse.js';
 import { ApiError} from './core/ApiError.js';
 import userRoutes from './routes/users.js';
 import movieRoutes from './routes/movies.js'
+import theatreRoutes from './routes/theatre.js'
 import expressHealthRoute from './routes/healthCheck.js';
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(express.json());
  */
 app.use("/users", userRoutes);
 app.use("/movies", movieRoutes);
+app.use("/theatre", theatreRoutes);
 app.use(expressHealthRoute);
 
 

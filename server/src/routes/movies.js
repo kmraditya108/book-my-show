@@ -1,5 +1,5 @@
 import express from 'express';
-import {findAll, findOne} from '../controller/movies.js'
+import {findAll, findOne, findTheatresById} from '../controller/movies.js'
 
 const movieRoutes = express.Router();
 
@@ -12,6 +12,8 @@ movieRoutes.get('/:id', findOne);
 //     const{id} = req.params;
 //     console.log("findOne --- movie id>>>> ", id);
 // });
+
+// movieRoutes.get('/:movieId/screenig', findTheatresById);
 
 
 

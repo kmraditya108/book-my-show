@@ -31,3 +31,10 @@ export class AuthenticationError extends ApiError{
         this.status=500;
     }
 }
+
+export class ForbiddenError extends ApiError{
+    constructor(message="Forbidden error"){
+        super(message);
+        this.status = 403;
+    }
+}

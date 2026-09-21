@@ -3,8 +3,10 @@
  * As soon we start the server, it(server.js) should bring up the whole express application.
  */
 
+import Logger from "./core/Logger.js";
 import app from "./app.js";
 import AppDataSource from "./data-source.js";
+
 
 const PORT = 8080;
 
@@ -14,10 +16,10 @@ const PORT = 8080;
     try {
         await AppDataSource.connect();
         app.listen(PORT, () => {
-            console.log(`Server started at ${PORT}`);
+            Logger.info(`Server started at ${PORT}`);
         })
     } catch (error) {
         await AppDataSource.disconnect();
-        console.error("error: ", error);
+        Logger.error("error: ", error);
     }
 })();

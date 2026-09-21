@@ -7,7 +7,7 @@ import UserContext from '../context/user-context';
 
 const LoginPage = () => {
     const userContext = useContext(UserContext);
-    const{isLoggedIn, role, email, token, loginUser}=userContext;
+    const{isLoggedIn, role, email, token, login}=userContext;
     const{showAlert, hideAlert, alertUI}=useSnackBarAlert();
 
     const [formData, setFormData] = useState({
@@ -18,15 +18,15 @@ const LoginPage = () => {
 
     const handleFormSubmit = async e => {
         e.preventDefault();
-        console.log("formData >> ", formData);
-        const loginRes = await loginUser({...formData});
+        // console.log("formData >> ", formData);
+        const loginRes = await login({...formData});
         // const res = loginRes.json();
-        console.log("loginRes >> ", isLoggedIn, role, email, token, loginRes);
+        // console.log("loginRes >> ", isLoggedIn, role, email, token, loginRes);
         
         
         // axios.post('http://localhost:8080/login', {...formData})
         // .then(res=>{
-        //     console.log('login Success res > ', res);
+        //     // console.log('login Success res > ', res);
         //     showAlert(res?.data?.message, 'success')
         // }).catch(e=>{
         //     showAlert(e?.response?.data?.message, 'error')

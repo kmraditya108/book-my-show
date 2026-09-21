@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Chip,
@@ -15,6 +15,8 @@ import {
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import useHttp from '../customHooks/useHttp';
+import { getAllUsers } from '../lib/apis';
 
 const sampleUsers = [
   {
@@ -42,8 +44,24 @@ const formatDate = (value) => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 };
 
-const UsersList = ({ users = sampleUsers }) => {
+// const UsersList = ({ users = sampleUsers }) => {
+const UsersList = () => {
+  const{data:allUsers, error, status, sendRequest:fetchAllUsersCall} = useHttp(getAllUsers, false);
+
   const [showPasswordMap, setShowPasswordMap] = useState({});
+  const [userList, setUserList] = useState([]);
+
+  useEffect(()=>{
+    // // console.log("fetchAllUsersCall>>>");
+    
+    fetchAllUsersCall()
+  }, []);
+
+  useEffect(()=>{
+    if(status==='completed' && allUsers){
+      setUserList(allUsers?.payload);
+    }
+  }, [allUsers, status])
 
   const togglePasswordVisibility = (userId) => {
     setShowPasswordMap((prev) => ({
@@ -76,22 +94,22 @@ const UsersList = ({ users = sampleUsers }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((user) => {
-              const isPasswordVisible = !!showPasswordMap[user._id];
+            {userList.length>0 && userList?.map((user) => {
+              const isPasswordVisible = !!showPasswordMap[user?._id];
 
               return (
-                <TableRow key={user._id || user.email} hover>
-                  <TableCell>{user._id}</TableCell>
-                  <TableCell>{user.email}</TableCell>
+                <TableRow key={user?._id || user.email} hover>
+                  <TableCell>{user?._id}</TableCell>
+                  <TableCell>{user?.email}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography variant="body2" sx={{ minWidth: 120 }}>
-                        {isPasswordVisible ? user.password : '****'}
+                        {isPasswordVisible ? user?.password : '****'}
                       </Typography>
                       <IconButton
                         size="small"
                         color="primary"
-                        onClick={() => togglePasswordVisibility(user._id)}
+                        onClick={() => togglePasswordVisibility(user?._id)}
                         aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
                       >
                         {isPasswordVisible ? <VisibilityOffIcon /> : <VisibilityIcon />}
@@ -100,13 +118,13 @@ const UsersList = ({ users = sampleUsers }) => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={user.role}
-                      color={user.role === 'ADMIN' ? 'secondary' : 'primary'}
+                      label={user?.role}
+                      color={user?.role === 'ADMIN' ? 'secondary' : 'primary'}
                       size="small"
                     />
                   </TableCell>
-                  <TableCell>{formatDate(user.createdAt)}</TableCell>
-                  <TableCell>{formatDate(user.updatedAt)}</TableCell>
+                  <TableCell>{formatDate(user?.createdAt)}</TableCell>
+                  <TableCell>{formatDate(user?.updatedAt)}</TableCell>
                 </TableRow>
               );
             })}

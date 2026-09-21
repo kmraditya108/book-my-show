@@ -17,29 +17,29 @@ const SignUpPage = () => {
         type: ''
     })
     const handleChange = (e) => {
-        console.log("[e.target.name]:e.targte.value >>> ", e.target.name, e.target.value);
+        // console.log("[e.target.name]:e.targte.value >>> ", e.target.name, e.target.value);
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("formData >>> ", formData);
+        // console.log("formData >>> ", formData);
         const { email, password, type: role } = formData;
-        console.log("email,password,type >>> ", email, password, role);
+        // console.log("email,password,type >>> ", email, password, role);
 
         axios.post('http://localhost:8080/users/registration', {
             email: email,
             password: password,
             role: role
         }).then(res => {
-            // console.log("Registartion response : ", res);
+            // // console.log("Registartion response : ", res);
             showAlert(res?.data?.message, 'success');
             // navigate('/login');
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
         }).catch(e => {
-            console.log('1--Catched errror >> ', e?.response);
+            // console.log('1--Catched errror >> ', e?.response);
             // Fallback to e.message if the server didn't return a custom message
             const errorMessage = e?.response?.data?.message || e?.message || 'An error occurred';
 

@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { BadRequestError, AuthenticationError } from '../core/ApiError.js';
+import { BadRequestError, AuthenticationError, NotFoundError } from '../core/ApiError.js';
 import { ApiResponse } from '../core/ApiResponse.js';
 
 const JWT_TOKEN = 'aditya';
@@ -33,7 +33,7 @@ export const userLogin = async (req, res) => {
     }
 
     // generate JWT token
-    const token = jwt.sign({ userId: user._id }, JWT_TOKEN, { expiresIn: '2d' });
+    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_TOKEN, { expiresIn: '2d' });
 
     const userObj = user.toObject();
     delete userObj.password;
@@ -51,7 +51,8 @@ export const findAllUsers = async (req, res) => {
 }
 
 export const getUserProfile = async (req, res) => {
-    const { userId } = req;
+    const { userId } = req.user;
     const user = await User.findById(userId).select('-password');
+    if(!user) throw new NotFoundError('User do not exist!');
     res.json(ApiResponse.build(true, 'user profile', user));
 }

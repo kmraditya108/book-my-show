@@ -2,89 +2,103 @@ import { createContext, useEffect, useState } from "react"
 import axios from "axios";
 import { useNavigate } from "react-router";
 
-import {setCookies} from '../utils/cookies.js'
+import { getCookies, resetCookies, setCookies } from '../utils/cookies.js'
+import useHttps from "../customHooks/useHttps.jsx";
+import { fetchProfile, loginUser as loginApi } from "../lib/apis.js";
+import useHttp from "../customHooks/useHttp.jsx";
 
 const UserContext = createContext({
     isLoggedIn: false,
     role: null,
     email: null,
     usersList: null,
-    loginUser: () => {},
-    resetUserContext: () => {},
-    getUserLists: () => {}
+    login: () => { },
+    resetUserContext: () => { },
+    getUserLists: () => { }
 });
 
 export const UserContextProvider = (props) => {
     const navigate = useNavigate();
+    const { isLoading, error, responseData, sendRequest: loginRequestHandler } = useHttps(loginApi);
+    const { isLoading: profileIsLoading, error: profileError, data: profileResponseData, sendRequest: profileRequestHandler } = useHttp(fetchProfile, false)
 
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState();
     const [usersList, setUsersList] = useState();
     const [token, setToken] = useState();
 
-    const loginUser = async (userCredential) => {
-        console.log("userCredential >> ", userCredential);
+    const login = async (userCredential) => {
+        await loginRequestHandler(userCredential);
+    }
 
-        try {
-            const res = await axios.post('http://localhost:8080/users/login', { ...userCredential });
-            console.log("res >> ", res, res?.data?.payload, '\n  Token >>>>> ', res?.data?.payload?.token);
-            // setUser(res?.data?.payload)
-
-            setToken(res?.data?.payload?.token);
-            // document.cookie = `token=${res?.data?.payload?.token};`;
-            setCookies(`token=${res?.data?.payload?.token}`)
-            setIsLoggedIn(true);
-            navigate('/')
-        } catch (error) {
-            console.log(error);
+    // 1. Case-1: When user undergoes login via login form
+    useEffect(() => {
+        if (!isLoading && responseData?.payload) {
+            localStorage.setItem('token', responseData?.payload?.token);
+            setToken(responseData?.payload?.token);
+            resetCookies();
+            setCookies(`token=${responseData?.payload?.token}`)
+            
+            profileRequestHandler();
         }
-    }
-
-    const resetUserContext = () => {
-        setIsLoggedIn(false);
-        setUser(null);
-        setToken(null);
-    }
+    }, [isLoading, responseData]);
 
     useEffect(() => {
-        console.log("user >> ", user);
-        if (isLoggedIn) {
-            (async () => {
-                const userData = await axios.get('http://localhost:8080/users/profile', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                setUser(userData?.data?.payload)
-                console.log("userData >> ", userData);
-            })()
+        if (!isLoading && error) {
+            setToken();
+            resetCookies();
+            // console.log("error >> ", error.message);
         }
-    }, [isLoggedIn]);
+    }, [isLoading, error]);
 
-    const getUserLists = async() => {
-        try {
-            const userListRes = await axios.get('http://localhost:8080/users/all', {
-                headers:{
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            console.log("userListRes >>> ", userListRes?.data?.payload);
-            setUsersList(usersList)
-            setTimeout(()=>navigate('/users-list'),100);
+    const resetUserContext = () => {
+        setUser(null);
+        setToken(null);
+        resetCookies();
+        localStorage.removeItem('token');
+    }
 
-        } catch (error) {
-            console.error('Error while fetching users list details : '+error);
+     useEffect(() => {
+        if (!profileIsLoading && profileResponseData) {
+            
+            setUser(profileResponseData?.payload)
+            navigate('/');
         }
-        
+    }, [profileIsLoading, profileResponseData]);
+
+
+    // Case-2: When user is already logged-in and revisit to the site.
+    useEffect(()=>{
+        if(getCookies('token')){
+            console.clear();
+            profileRequestHandler();
+        }
+    }, [])
+
+
+    const getUserLists = async () => {
+        // try {
+        //     const userListRes = await axios.get('http://localhost:8080/users/all', {
+        //         headers: {
+        //             Authorization: `Bearer ${token}`
+        //         }
+        //     });
+        //     // console.log("userListRes >>> ", userListRes?.data?.payload);
+        //     setUsersList(usersList)
+        //     setTimeout(() => navigate('/users-list', usersList), 100);
+
+        // } catch (error) {
+        //     console.error('Error while fetching users list details : ' + error);
+        // }
+        navigate('/users-list');
     }
 
     const context = {
-        isLoggedIn: isLoggedIn,
+        isLoggedIn: user ? true : false,
         role: user?.role,
         email: user?.email,
         token: token,
         usersList: usersList,
-        loginUser: loginUser,
+        login: login,
         resetUserContext: resetUserContext,
         getUserLists: getUserLists,
     }
